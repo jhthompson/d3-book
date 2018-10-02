@@ -5,7 +5,7 @@
 		<title>D3: Drawing divs, spaced out</title>
 		<script type="text/javascript" src="../d3.js"></script>
 		<style type="text/css">
-		
+
 			div.bar {
 				display: inline-block;
 				width: 20px;
@@ -13,14 +13,14 @@
 				margin-right: 2px;
 				background-color: teal;
 			}
-		
+
 		</style>
 	</head>
 	<body>
 		<script type="text/javascript">
-		
+
 			var dataset = [ 5, 10, 15, 20, 25 ];
-			
+
 			d3.select("body").selectAll("div")
 				.data(dataset)
 				.enter()
@@ -30,7 +30,7 @@
 					var barHeight = d * 5;
 					return barHeight + "px";
 				});
-			
+
 		</script>
 	</body>
 </html>

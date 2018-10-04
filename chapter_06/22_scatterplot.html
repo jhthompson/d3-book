@@ -5,39 +5,63 @@
 		<title>D3: A simple scatterplot with SVG</title>
 		<script type="text/javascript" src="../d3.js"></script>
 		<style type="text/css">
-			/* No style rules here yet */		
+			/* No style rules here yet */
 		</style>
 	</head>
 	<body>
 		<script type="text/javascript">
 
-			//Width and height
-			var w = 500;
-			var h = 100;
-			
-			var dataset = [
-							[5, 20], [480, 90], [250, 50], [100, 33], [330, 95],
-							[410, 12], [475, 44], [25, 67], [85, 21], [220, 88]
-						  ];
-	
-			//Create SVG element
-			var svg = d3.select("body")
-						.append("svg")
-						.attr("width", w)
-						.attr("height", h);
+			d3.json("allActiviesCanada.txt", function(json) {
+			    root = json;
+					console.log(root);
 
-			svg.selectAll("circle")
-			   .data(dataset)
-			   .enter()
-			   .append("circle")
-			   .attr("cx", function(d) {
-			   		return d[0];
-			   })
-			   .attr("cy", function(d) {
-			   		return d[1];
-			   })
-			   .attr("r", 5);
-			
+					//Width and height
+					var w = 0;
+					var h = 0;
+
+					for (var i = 0; i < root.length; i++) {
+
+					}
+
+
+
+					var dataset = [
+									[5, 20], [480, 90], [250, 50], [100, 33], [330, 95],
+									[410, 12], [475, 44], [25, 67], [85, 21], [220, 88]
+									];
+
+					//Create SVG element
+					var svg = d3.select("body")
+								.append("svg")
+								.attr("width", w)
+								.attr("height", h);
+
+					svg.selectAll("circle")
+						 .data(root)
+						 .enter()
+						 .append("circle")
+						 .attr("cx", function(d) {
+								return 100 + d.distance / 10;
+						 })
+						 .attr("cy", function(d) {
+								return 100 + d.distance / 10;
+						 })
+						 .attr("r", function(d) {
+							 	console.log(Math.sqrt(h - d.distance/1000));
+								return Math.sqrt(d.distance/1000);
+						 })
+						 .attr("fill", function(d) {
+							 	console.log(d.workout_type);
+								if(d.workout_type==0)
+									return 'black';
+								else if (d.workout_type==1)
+									return 'red';
+								else if(d.workout_type==3)
+									return 'yellow';
+								return 'blue';
+						 })
+			});
+
 		</script>
 	</body>
 </html>

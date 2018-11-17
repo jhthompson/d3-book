@@ -11,18 +11,76 @@
 	<body>
 		<script type="text/javascript">
 
+			//Width and height
+			var w = 500;
+			var h = 500;
+
+			var padding = 30;
+
+			var dataset, xScale, yScale, xTimeScale, aScale, root, xAxis, yAxis;  //Empty, for now
+
+			var parseTime = d3.timeParse("%Y-%m-%dT%H:%M:%SZ");
+
+			//For converting Dates to strings
+			var formatTime = d3.timeFormat("%e");
+
+			//Function for converting CSV values from strings to Dates and numbers
+			var rowConverter = function(d) {
+				return {
+					Date: parseTime(d.start_date)
+				};
+			}
+
 			d3.json("allActiviesCanada.txt", function(json) {
 			    root = json;
+
+					root.forEach(d => {
+						d.Date = parseTime(d.start_date);
+					});
+
+					//Discover start and end dates in dataset
+					var startDate = d3.min(root, function(d) { return d.Date; });
+					var endDate = d3.max(root, function(d) { return d.Date; });
+
 					console.log(root);
 
-					//Width and height
-					var w = 0;
-					var h = 0;
+					xScaleOld = d3.scaleLinear()
+               .domain([0, d3.max(root, function(d) { return d.distance; })])
+               .range([padding, w - padding]);
 
-					for (var i = 0; i < root.length; i++) {
+					 //Create scale functions
+	 				xScale = d3.scaleTime()
+	 							   .domain([
+	 									d3.timeDay.offset(startDate, -1),  //startDate minus one day, for padding
+	 									d3.timeDay.offset(endDate, 1)	  //endDate plus one day, for padding
+	 								])
+	 							   .range([padding, w - padding]);
 
-					}
+				  yScale = d3.scaleLinear()
+               .domain([0, d3.max(root, function(d) { return d.average_speed; })])
+               .range([h - padding, padding]);
 
+					yScaleOld = d3.scaleTime()
+							 .domain([
+										d3.min(root, function(d) { return d.Date.getHours(); }),
+										d3.max(root, function(d) { return d.Date.getHours(); })
+							 ])
+							 .range([padding, w - padding]);
+
+				  aScale = d3.scaleSqrt()      // <--New!
+	             .domain([0, d3.max(root, function(d) { return d.distance; })])
+	             .range([0, 10]);  // <--New!
+
+					 //Define X axis
+					 xAxis = d3.axisBottom()
+										 .scale(xScale)
+										 .ticks(9)
+										 .tickFormat(formatTime);
+
+					 //Define Y axis
+					 yAxis = d3.axisLeft()
+										 .scale(yScale)
+										 .ticks(10);
 
 
 					var dataset = [
@@ -41,26 +99,68 @@
 						 .enter()
 						 .append("circle")
 						 .attr("cx", function(d) {
-								return 100 + d.distance / 10;
+								return xScale(d.Date);
 						 })
 						 .attr("cy", function(d) {
-								return 100 + d.distance / 10;
-						 })
-						 .attr("r", function(d) {
-							 	console.log(Math.sqrt(h - d.distance/1000));
-								return Math.sqrt(d.distance/1000);
+								return yScale(d.average_speed);
 						 })
 						 .attr("fill", function(d) {
-							 	console.log(d.workout_type);
+							 	//console.log(d.workout_type);
 								if(d.workout_type==0)
-									return 'black';
+									return 'blue'; //nothing special
 								else if (d.workout_type==1)
-									return 'red';
+									return 'red'; //race
+								else if (d.workout_type==2)
+										return 'green'; //long run
 								else if(d.workout_type==3)
-									return 'yellow';
+									return 'yellow'; //workout
 								return 'blue';
 						 })
-			});
+						 .attr("r", function(d) {
+							 return aScale(d.distance);
+						 })
+
+					 svg.selectAll("text")
+						.data(root)
+						.enter()
+						.append("text")
+						.text(function(d) {
+							 return d.name;
+						})
+						.attr("x", function(d) {
+							 return xScale(d.Date);
+						})
+						.attr("y", function(d) {
+							 return yScale(d.average_speed);
+						})
+						.attr("font-family", "sans-serif")
+						.attr("font-size", "11px")
+						.attr("fill", function(d) {
+							 //console.log(d.workout_type);
+							 if(d.workout_type==0)
+								 return 'black'; //nothing special
+							 else if (d.workout_type==1)
+								 return 'red'; //race
+							 else if (d.workout_type==2)
+								return 'green'; //long run
+							 else if(d.workout_type==3)
+								 return 'yellow'; //workout
+							 else
+							 	 return 'black';
+						})
+
+						//Create X axis
+						svg.append("g")
+							.attr("class", "axis")
+							.attr("transform", "translate(0," + (h - padding) + ")")
+							.call(xAxis);
+
+						//Create Y axis
+						svg.append("g")
+							.attr("class", "axis")
+							.attr("transform", "translate(" + padding + ",0)")
+							.call(yAxis);
+					});
 
 		</script>
 	</body>
